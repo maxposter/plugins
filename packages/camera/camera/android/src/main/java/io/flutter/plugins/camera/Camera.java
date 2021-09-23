@@ -12,6 +12,7 @@ import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
@@ -19,6 +20,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
@@ -227,6 +229,49 @@ class Camera
       return;
     }
 
+    // Open the camera.
+    CameraManager cameraManager = CameraUtils.getCameraManager(activity);
+
+    try {
+      if (cameraFeatures.getResolution().getValue() == ResolutionPreset.ultraHigh) {
+        Size previewSize = null;
+        CamcorderProfile profile =
+                ResolutionFeature.getBestAvailableCamcorderProfileForResolutionPreset(
+                        Integer.parseInt(cameraProperties.getCameraName()),
+                        ResolutionPreset.high);
+
+        if(profile.videoFrameWidth > profile.videoFrameHeight) {
+          previewSize = new Size(profile.videoFrameHeight / 3 * 4, profile.videoFrameHeight);
+        } else {
+
+          previewSize = new Size(profile.videoFrameWidth, profile.videoFrameHeight / 4 * 3);
+        }
+
+        CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraProperties.getCameraName());
+
+        StreamConfigurationMap configs = characteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        Size[] sizes = configs.getOutputSizes(ImageFormat.JPEG);
+        Size max = null;
+        final double ratio43 = 4/3.0;
+        for(Size size: sizes) {
+          double ratio = Double.valueOf(size.getWidth()) / Double.valueOf(size.getHeight());
+          if(ratio == ratio43 && size.getWidth() > size.getHeight()) {
+            if(max == null) {
+              max = size;
+            }
+            if(size.getWidth() > max.getWidth() || size.getHeight() > max.getHeight()) {
+              max = size;
+            }
+          }
+        }
+        if(max != null) {
+          cameraFeatures.getResolution().setOverrideSize(max,previewSize);
+        }
+      }
+    } catch (Exception e) {
+    }
+
     // Always capture using JPEG format.
     pictureImageReader =
         ImageReader.newInstance(
@@ -248,8 +293,6 @@ class Camera
             imageFormat,
             1);
 
-    // Open the camera.
-    CameraManager cameraManager = CameraUtils.getCameraManager(activity);
     cameraManager.openCamera(
         cameraProperties.getCameraName(),
         new CameraDevice.StateCallback() {

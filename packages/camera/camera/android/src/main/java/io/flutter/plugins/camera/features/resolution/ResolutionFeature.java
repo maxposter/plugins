@@ -19,6 +19,7 @@ import io.flutter.plugins.camera.features.CameraFeature;
  * required to configure the resolution using the {@link android.hardware.camera2} API.
  */
 public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
+  private boolean overrideSize;
   private Size captureSize;
   private Size previewSize;
   private CamcorderProfile recordingProfile;
@@ -86,6 +87,13 @@ public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
   @Override
   public void setValue(ResolutionPreset value) {
     this.currentSetting = value;
+    configureResolution(currentSetting, cameraId);
+  }
+
+  public void setOverrideSize(Size captureSize, Size previewSize) {
+    this.overrideSize = true;
+    this.captureSize = captureSize;
+    this.previewSize = previewSize;
     configureResolution(currentSetting, cameraId);
   }
 
@@ -165,7 +173,7 @@ public class ResolutionFeature extends CameraFeature<ResolutionPreset> {
   }
 
   private void configureResolution(ResolutionPreset resolutionPreset, int cameraId) {
-    if (!checkIsSupported()) {
+    if (!checkIsSupported() || overrideSize) {
       return;
     }
     recordingProfile =
