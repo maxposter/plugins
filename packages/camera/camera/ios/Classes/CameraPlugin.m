@@ -531,18 +531,9 @@ NSString *const errorMethod = @"error";
   switch (resolutionPreset) {
     case max:
     case ultraHigh:
-      if (@available(iOS 9.0, *)) {
-        if ([_captureSession canSetSessionPreset:AVCaptureSessionPreset3840x2160]) {
-          _captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
-          _previewSize = CGSizeMake(3840, 2160);
-          break;
-        }
-      }
-      if ([_captureSession canSetSessionPreset:AVCaptureSessionPresetHigh]) {
-        _captureSession.sessionPreset = AVCaptureSessionPresetHigh;
-        _previewSize =
-            CGSizeMake(_captureDevice.activeFormat.highResolutionStillImageDimensions.width,
-                       _captureDevice.activeFormat.highResolutionStillImageDimensions.height);
+        if ([_captureSession canSetSessionPreset:AVCaptureSessionPresetPhoto]) {
+          _captureSession.sessionPreset = AVCaptureSessionPresetPhoto;
+            _previewSize = CGSizeMake(1440, 1080);
         break;
       }
     case veryHigh:

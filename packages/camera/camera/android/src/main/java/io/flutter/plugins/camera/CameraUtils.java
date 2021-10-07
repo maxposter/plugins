@@ -83,6 +83,23 @@ public final class CameraUtils {
   }
 
   static Size computeBestPreviewSize(String cameraName, ResolutionPreset preset) {
+    try {
+      if (preset == ResolutionPreset.ultraHigh) {
+        CamcorderProfile profile =
+                getBestAvailableCamcorderProfileForResolutionPreset(
+                        cameraName,
+                        ResolutionPreset.high);
+
+        if(profile.videoFrameWidth > profile.videoFrameHeight) {
+          return new Size(profile.videoFrameHeight / 3 * 4, profile.videoFrameHeight);
+        } else {
+          return new Size(profile.videoFrameWidth, profile.videoFrameHeight / 4 * 3);
+        }
+      }
+    } catch (Exception e) {
+    }
+
+
     if (preset.ordinal() > ResolutionPreset.high.ordinal()) {
       preset = ResolutionPreset.high;
     }
@@ -138,8 +155,8 @@ public final class CameraUtils {
           return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
         }
       case ultraHigh:
-        if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_2160P)) {
-          return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_2160P);
+        if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH)) {
+          return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
         }
       case veryHigh:
         if (CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P)) {

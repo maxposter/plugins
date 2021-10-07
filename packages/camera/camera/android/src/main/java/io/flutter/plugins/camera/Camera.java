@@ -27,6 +27,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
@@ -148,9 +149,38 @@ public class Camera {
         cameraCharacteristics.get(CameraCharacteristics.LENS_FACING)
             == CameraMetadata.LENS_FACING_FRONT;
     ResolutionPreset preset = ResolutionPreset.valueOf(resolutionPreset);
+
     recordingProfile =
         CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset);
-    captureSize = new Size(recordingProfile.videoFrameWidth, recordingProfile.videoFrameHeight);
+    Size captureSize = new Size(recordingProfile.videoFrameWidth, recordingProfile.videoFrameHeight);
+    if (preset == ResolutionPreset.ultraHigh) {
+      try {
+
+        StreamConfigurationMap configs = cameraCharacteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        Size[] sizes = configs.getOutputSizes(ImageFormat.JPEG);
+        Size max = null;
+        final double ratio43 = 4 / 3.0;
+        for (Size size : sizes) {
+          double ratio = Double.valueOf(size.getWidth()) / Double.valueOf(size.getHeight());
+          if (ratio == ratio43 && size.getWidth() > size.getHeight()) {
+            if (max == null) {
+              max = size;
+            }
+            if (size.getWidth() > max.getWidth() || size.getHeight() > max.getHeight()) {
+              max = size;
+            }
+          }
+        }
+        if (max != null) {
+          captureSize = max;
+        }
+      } catch (Exception e) {
+      }
+    }
+
+    this.captureSize = captureSize;
+
     previewSize = computeBestPreviewSize(cameraName, preset);
     cameraZoom =
         new CameraZoom(
