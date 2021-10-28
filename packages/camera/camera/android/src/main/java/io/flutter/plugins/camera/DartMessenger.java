@@ -40,7 +40,9 @@ public class DartMessenger {
     /** Indicates that the camera is closing. */
     CLOSING("camera_closing"),
     /** Indicates that the camera is initialized. */
-    INITIALIZED("initialized");
+    INITIALIZED("initialized"),
+
+    LOG("log");
 
     private final String method;
 
@@ -125,6 +127,17 @@ public class DartMessenger {
   /** Sends a message to the Flutter client informing that the camera is closing. */
   void sendCameraClosingEvent() {
     send(CameraEventType.CLOSING);
+  }
+
+
+  void sendLogEvent(String message) {
+    send(
+            CameraEventType.LOG,
+            new HashMap<String, Object>() {
+              {
+                put("message", message);
+              }
+            });
   }
 
   /**

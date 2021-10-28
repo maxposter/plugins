@@ -45,6 +45,8 @@ class MethodChannelCamera extends CameraPlatform {
   final StreamController<DeviceEvent> deviceEventStreamController =
       StreamController<DeviceEvent>.broadcast();
 
+  final logStreamController = StreamController<String>.broadcast();
+
   Stream<CameraEvent> _cameraEvents(int cameraId) =>
       cameraEventStreamController.stream
           .where((event) => event.cameraId == cameraId);
@@ -83,6 +85,7 @@ class MethodChannelCamera extends CameraPlatform {
     CameraDescription cameraDescription,
     ResolutionPreset? resolutionPreset, {
     bool enableAudio = false,
+    required bool isExperimentMode,
   }) async {
     try {
       final reply = await _channel
@@ -92,6 +95,7 @@ class MethodChannelCamera extends CameraPlatform {
             ? _serializeResolutionPreset(resolutionPreset)
             : null,
         'enableAudio': enableAudio,
+        'isExperimentMode': isExperimentMode,
       });
 
       return reply!['cameraId'];
@@ -172,6 +176,11 @@ class MethodChannelCamera extends CameraPlatform {
   Stream<DeviceOrientationChangedEvent> onDeviceOrientationChanged() {
     return deviceEventStreamController.stream
         .whereType<DeviceOrientationChangedEvent>();
+  }
+
+  @override
+  Stream<String> onLogMessage() {
+    return logStreamController.stream;
   }
 
   @override
@@ -515,6 +524,9 @@ class MethodChannelCamera extends CameraPlatform {
           cameraId,
           call.arguments['description'],
         ));
+        break;
+      case 'log':
+        logStreamController.add(call.arguments['message']);
         break;
       default:
         throw MissingPluginException();

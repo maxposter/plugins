@@ -87,6 +87,7 @@ public class Camera {
   private final Size captureSize;
   private final Size previewSize;
   private final boolean enableAudio;
+  private final boolean isExperimentMode;
   private final Context applicationContext;
   private final CamcorderProfile recordingProfile;
   private final DartMessenger dartMessenger;
@@ -120,19 +121,23 @@ public class Camera {
     supportedImageFormats.put("jpeg", 256);
   }
 
+  private Surface flutterSurfaceExperiment;
+
   public Camera(
       final Activity activity,
       final SurfaceTextureEntry flutterTexture,
       final DartMessenger dartMessenger,
       final String cameraName,
       final String resolutionPreset,
-      final boolean enableAudio)
+      final boolean enableAudio,
+      final boolean isExperimentMode)
       throws CameraAccessException {
     if (activity == null) {
       throw new IllegalStateException("No activity available!");
     }
     this.cameraName = cameraName;
     this.enableAudio = enableAudio;
+    this.isExperimentMode = isExperimentMode;
     this.flutterTexture = flutterTexture;
     this.dartMessenger = dartMessenger;
     this.cameraManager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
@@ -190,6 +195,10 @@ public class Camera {
     deviceOrientationListener =
         new DeviceOrientationManager(activity, dartMessenger, isFrontFacing, sensorOrientation);
     deviceOrientationListener.start();
+  }
+
+  private void log(String message) {
+    dartMessenger.sendLogEvent(message);
   }
 
   private void initFps(CameraCharacteristics cameraCharacteristics) {
@@ -324,6 +333,9 @@ public class Camera {
     SurfaceTexture surfaceTexture = flutterTexture.surfaceTexture();
     surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
     Surface flutterSurface = new Surface(surfaceTexture);
+    if(isExperimentMode) {
+      flutterSurfaceExperiment = flutterSurface;
+    }
     captureRequestBuilder.addTarget(flutterSurface);
 
     List<Surface> remainingSurfaces = Arrays.asList(surfaces);
@@ -517,6 +529,8 @@ public class Camera {
 
           Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
           Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+
+          log("processCapture aeState: " + aeState + " afState: " + afState);
           switch (pictureCaptureRequest.getState()) {
             case focusing:
               if (afState == null) {
@@ -536,8 +550,9 @@ public class Camera {
               if (aeState == null
                   || aeState == CaptureRequest.CONTROL_AE_STATE_PRECAPTURE
                   || aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED
-                  || aeState == CaptureRequest.CONTROL_AE_STATE_CONVERGED) {
+                  || aeState == CaptureRequest.CONTROL_AE_STATE_CONVERGED || isExperimentMode) {
                 pictureCaptureRequest.setState(State.waitingPreCaptureReady);
+
                 setPreCaptureStartTime();
               }
               break;

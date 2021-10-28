@@ -55,6 +55,7 @@ abstract class CameraPlatform extends PlatformInterface {
     CameraDescription cameraDescription,
     ResolutionPreset? resolutionPreset, {
     bool enableAudio = false,
+    required bool isExperimentMode,
   }) {
     throw UnimplementedError('createCamera() is not implemented.');
   }
@@ -104,6 +105,10 @@ abstract class CameraPlatform extends PlatformInterface {
   Stream<DeviceOrientationChangedEvent> onDeviceOrientationChanged() {
     throw UnimplementedError(
         'onDeviceOrientationChanged() is not implemented.');
+  }
+
+  Stream<String> onLogMessage() {
+    throw UnimplementedError('onLogMessage() is not implemented.');
   }
 
   /// Locks the capture orientation.

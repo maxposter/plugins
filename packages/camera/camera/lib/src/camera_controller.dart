@@ -207,8 +207,12 @@ class CameraController extends ValueNotifier<CameraValue> {
     this.description,
     this.resolutionPreset, {
     this.enableAudio = true,
+    required this.isExperimentMode,
+    required this.onMessage,
     this.imageFormatGroup,
-  }) : super(const CameraValue.uninitialized());
+  }) : super(const CameraValue.uninitialized()) {
+    onMessage('Start experiment mode: $isExperimentMode');
+  }
 
   /// The properties of the camera device controlled by this controller.
   final CameraDescription description;
@@ -224,6 +228,9 @@ class CameraController extends ValueNotifier<CameraValue> {
   /// Whether to include audio when recording a video.
   final bool enableAudio;
 
+  final bool isExperimentMode;
+  final void Function(String) onMessage;
+
   /// The [ImageFormatGroup] describes the output of the raw image format.
   ///
   /// When null the imageFormat will fallback to the platforms default.
@@ -238,6 +245,9 @@ class CameraController extends ValueNotifier<CameraValue> {
   StreamSubscription<dynamic>? _imageStreamSubscription;
   FutureOr<bool>? _initCalled;
   StreamSubscription? _deviceOrientationSubscription;
+  StreamSubscription? _logSubscription;
+
+  String? _lastLogMessage;
 
   /// Checks whether [CameraController.dispose] has completed successfully.
   ///
@@ -269,10 +279,18 @@ class CameraController extends ValueNotifier<CameraValue> {
         );
       });
 
+      _logSubscription = CameraPlatform.instance.onLogMessage().listen((event) {
+        if (_lastLogMessage != event) {
+          onMessage("SDK Camera: $event");
+        }
+        _lastLogMessage = event;
+      });
+
       _cameraId = await CameraPlatform.instance.createCamera(
         description,
         resolutionPreset,
         enableAudio: enableAudio,
+        isExperimentMode: isExperimentMode,
       );
 
       unawaited(CameraPlatform.instance
@@ -756,6 +774,7 @@ class CameraController extends ValueNotifier<CameraValue> {
       return;
     }
     unawaited(_deviceOrientationSubscription?.cancel());
+    unawaited(_logSubscription?.cancel());
     _isDisposed = true;
     super.dispose();
     if (_initCalled != null) {
