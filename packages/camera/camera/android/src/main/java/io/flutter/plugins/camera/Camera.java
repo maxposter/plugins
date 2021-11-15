@@ -442,6 +442,8 @@ public class Camera {
 
   public void takePicture(@NonNull final Result result) {
     // Only take 1 picture at a time
+
+    log("plugin take request");
     if (pictureCaptureRequest != null && !pictureCaptureRequest.isFinished()) {
       result.error("captureAlreadyActive", "Picture is currently already being captured", null);
       return;
@@ -530,8 +532,10 @@ public class Camera {
           Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
           Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
 
-          log("processCapture aeState: " + aeState + " afState: " + afState);
-          switch (pictureCaptureRequest.getState()) {
+          State requestState = pictureCaptureRequest.getState();
+
+          log("plugin ae: " + aeState + " af: " + afState + " request:" + requestState);
+          switch (requestState) {
             case focusing:
               if (afState == null) {
                 return;
@@ -550,7 +554,9 @@ public class Camera {
               if (aeState == null
                   || aeState == CaptureRequest.CONTROL_AE_STATE_PRECAPTURE
                   || aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED
-                  || aeState == CaptureRequest.CONTROL_AE_STATE_CONVERGED || isExperimentMode) {
+                  || aeState == CaptureRequest.CONTROL_AE_STATE_CONVERGED
+                      || isExperimentMode
+              ) {
                 pictureCaptureRequest.setState(State.waitingPreCaptureReady);
 
                 setPreCaptureStartTime();
@@ -570,6 +576,7 @@ public class Camera {
 
   private void runPictureAutoFocus() {
     assert (pictureCaptureRequest != null);
+    log("plugin auto focus");
 
     pictureCaptureRequest.setState(PictureCaptureRequest.State.focusing);
     lockAutoFocus(pictureCaptureCallback);
@@ -577,6 +584,9 @@ public class Camera {
 
   private void runPicturePreCapture() {
     assert (pictureCaptureRequest != null);
+
+    log("plugin precapture");
+
     pictureCaptureRequest.setState(PictureCaptureRequest.State.preCapture);
 
     captureRequestBuilder.set(
