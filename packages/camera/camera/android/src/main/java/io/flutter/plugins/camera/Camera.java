@@ -521,6 +521,7 @@ public class Camera {
               reason = "Unknown reason";
           }
           Log.w("Camera", "pictureCaptureCallback.onCaptureFailed(): " + reason);
+          log("Capture failed reason:" + failure.getReason());
           if (fatalFailure) pictureCaptureRequest.error("captureFailure", reason, null);
         }
 
@@ -536,6 +537,14 @@ public class Camera {
 
           log("plugin ae: " + aeState + " af: " + afState + " request:" + requestState);
           switch (requestState) {
+            case error:
+              if (aeState == CaptureRequest.CONTROL_AF_STATE_PASSIVE_SCAN) {
+                if(isExperimentMode) {
+                  runPictureCapture();
+                } else {
+                  unlockAutoFocus();
+                }
+              }
             case focusing:
               if (afState == null) {
                 return;
