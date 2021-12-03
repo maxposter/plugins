@@ -539,11 +539,7 @@ public class Camera {
           switch (requestState) {
             case error:
               if (aeState == CaptureRequest.CONTROL_AF_STATE_PASSIVE_SCAN) {
-                if(isExperimentMode) {
-                  runPictureCapture();
-                } else {
-                  unlockAutoFocus();
-                }
+                unlockAutoFocus();
               }
             case focusing:
               if (afState == null) {
