@@ -538,8 +538,12 @@ public class Camera {
           log("plugin ae: " + aeState + " af: " + afState + " request:" + requestState);
           switch (requestState) {
             case error:
-              if (aeState == CaptureRequest.CONTROL_AF_STATE_PASSIVE_SCAN) {
-                unlockAutoFocus();
+              if (aeState == null && afState == CaptureRequest.CONTROL_AF_STATE_PASSIVE_SCAN) {
+                if(isExperimentMode) {
+                  runPictureCapture();
+                } else {
+                  unlockAutoFocus();
+                }
               }
             case focusing:
               if (afState == null) {
