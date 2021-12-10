@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:camera/camera.dart';
+import 'package:camera_mp/camera.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
-import 'package:integration_test/integration_test.dart';
 
 void main() {
   late Directory testDir;

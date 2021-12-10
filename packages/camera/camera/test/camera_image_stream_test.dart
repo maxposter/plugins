@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:camera/camera.dart';
-import 'package:camera_platform_interface/camera_platform_interface.dart';
+import 'package:camera_mp/camera.dart';
+import 'package:camera_platform_interface_mp/camera_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'camera_test.dart';

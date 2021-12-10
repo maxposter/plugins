@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:async/async.dart';
-import 'package:camera_platform_interface/camera_platform_interface.dart';
-import 'package:camera_platform_interface/src/events/device_event.dart';
-import 'package:camera_platform_interface/src/method_channel/method_channel_camera.dart';
-import 'package:camera_platform_interface/src/types/focus_mode.dart';
-import 'package:camera_platform_interface/src/utils/utils.dart';
+import 'package:camera_platform_interface_mp/camera_platform_interface.dart';
+import 'package:camera_platform_interface_mp/src/events/device_event.dart';
+import 'package:camera_platform_interface_mp/src/method_channel/method_channel_camera.dart';
+import 'package:camera_platform_interface_mp/src/types/focus_mode.dart';
+import 'package:camera_platform_interface_mp/src/utils/utils.dart';
 import 'package:flutter/services.dart' hide DeviceOrientation;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';

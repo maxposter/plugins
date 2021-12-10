@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:camera/camera.dart';
+import 'package:camera_mp/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
