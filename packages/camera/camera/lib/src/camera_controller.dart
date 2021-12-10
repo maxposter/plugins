@@ -225,6 +225,7 @@ class CameraController extends ValueNotifier<CameraValue> {
     this.resolutionPreset, {
     this.enableAudio = true,
     this.imageFormatGroup,
+    required this.onMessage,
   }) : super(const CameraValue.uninitialized());
 
   /// The properties of the camera device controlled by this controller.
@@ -241,6 +242,8 @@ class CameraController extends ValueNotifier<CameraValue> {
   /// Whether to include audio when recording a video.
   final bool enableAudio;
 
+  final void Function(String) onMessage;
+
   /// The [ImageFormatGroup] describes the output of the raw image format.
   ///
   /// When null the imageFormat will fallback to the platforms default.
@@ -255,6 +258,9 @@ class CameraController extends ValueNotifier<CameraValue> {
   StreamSubscription<dynamic>? _imageStreamSubscription;
   FutureOr<bool>? _initCalled;
   StreamSubscription? _deviceOrientationSubscription;
+
+  StreamSubscription? _logSubscription;
+  String? _lastLogMessage;
 
   /// Checks whether [CameraController.dispose] has completed successfully.
   ///
@@ -284,6 +290,13 @@ class CameraController extends ValueNotifier<CameraValue> {
         value = value.copyWith(
           deviceOrientation: event.orientation,
         );
+      });
+
+      _logSubscription = CameraPlatform.instance.onLogMessage().listen((event) {
+        if (_lastLogMessage != event) {
+          onMessage("SDK Camera: $event");
+        }
+        _lastLogMessage = event;
       });
 
       _cameraId = await CameraPlatform.instance.createCamera(
@@ -802,6 +815,8 @@ class CameraController extends ValueNotifier<CameraValue> {
       return;
     }
     unawaited(_deviceOrientationSubscription?.cancel());
+    unawaited(_logSubscription?.cancel());
+
     _isDisposed = true;
     super.dispose();
     if (_initCalled != null) {

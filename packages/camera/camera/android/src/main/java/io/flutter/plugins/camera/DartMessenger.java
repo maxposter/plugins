@@ -40,7 +40,10 @@ public class DartMessenger {
     /** Indicates that the camera is closing. */
     CLOSING("camera_closing"),
     /** Indicates that the camera is initialized. */
-    INITIALIZED("initialized");
+    INITIALIZED("initialized"),
+
+    LOG("log");
+
 
     private final String method;
 
@@ -142,6 +145,17 @@ public class DartMessenger {
           }
         });
   }
+
+  void sendLogEvent(@Nullable String message) {
+    send(
+            CameraEventType.LOG,
+            new HashMap<String, Object>() {
+              {
+                if (!TextUtils.isEmpty(message)) put("message", message);
+              }
+            });
+  }
+
 
   private void send(CameraEventType eventType) {
     send(eventType, new HashMap<>());
