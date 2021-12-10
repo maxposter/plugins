@@ -247,7 +247,7 @@ class Camera
       if (cameraFeatures.getResolution().getValue() == ResolutionPreset.ultraHigh) {
         Size previewSize = null;
         CamcorderProfile profile =
-                ResolutionFeature.getBestAvailableCamcorderProfileForResolutionPreset(
+                ResolutionFeature.getBestAvailableCamcorderProfileForResolutionPresetLegacy(
                         Integer.parseInt(cameraProperties.getCameraName()),
                         ResolutionPreset.high);
 
